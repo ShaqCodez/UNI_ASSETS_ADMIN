@@ -1,9 +1,24 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using UNI_ASSETS.Data;
+using UNI_ASSETS.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 //builder.Services.AddRazorPages();
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddScoped<IRepositoryWrapper, RepositoryWrapper>();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAndroid",
+        policy => policy.AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod());
+});
+builder.Services.AddDbContext<AppDbContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("AssetManager")));
+builder.Services.AddDbContext<IdentityContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("IdentityAssetManager")));
+builder.Services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<IdentityContext>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -15,6 +30,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowAndroid");
 app.UseStaticFiles();
 app.UseRouting();
 
@@ -22,6 +38,7 @@ app.UseAuthorization();
 app.MapControllerRoute("", "{Controller=Home}/{Action=Index}/{id?}");
 //app.MapStaticAssets();
 //app.MapRazorPages()
-   //.WithStaticAssets();
-
+//.WithStaticAssets();
+SeedData.AddDummy(app);
+SeedData.AddAdmin(app);
 app.Run();

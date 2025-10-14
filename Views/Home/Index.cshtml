@@ -1,3 +1,74 @@
-﻿@{
+﻿@model HomeViewModel
+@{
     ViewData["Title"] = "Index";
 }
+<div>
+    <h2>Home</h2>
+   
+    @if(Model.Assets != null)
+    {
+        <br />
+        <h2 class="text-decoration-underline">Assets</h2>
+        int count = 0;
+        for(int j=0;j<3;j++)
+        {
+            int i = 0;
+            <div class="row">
+                 @while(i<4 && count !=10){
+            <div class="card col-2 m-1" style="width: 18rem;">
+                <img src="@Model.Assets[count].ImageUrl" class="card-img-top" alt="Asset Image">
+                <div class="card-body">
+                    <h5 class="card-title">@Model.Assets[count].Name</h5>
+                    <p class="card-text">@Model.Assets[count].Description</p>
+                    <a href="#" class="btn btn-primary">Get Analytics on Asset</a>
+                </div>
+                    </div>
+                    i++;
+                    count++;
+                }
+                 </div>
+           
+            
+        }
+    }
+    else
+    {
+        <div class="card mb-3" style="max-width: 540px;">
+  <div class="row g-0">
+    <div class="col-md-4">
+      <img src="/Images/ic_campus_logo.png" class="img-fluid rounded-start" alt="App Logo">
+    </div>
+    <div class="col-md-8">
+      <div class="card-body">
+        <h5 class="card-title">No Assets</h5>
+        <p class="card-text">Please make sure your android app is functional</p>
+        <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+      </div>
+    </div>
+  </div>
+</div>
+    }
+    <br />
+    @if(Model.Submissions != null)
+    {
+
+    }
+    else
+    {
+        <div class="card mb-3" style="max-width: 540px;">
+  <div class="row g-0">
+    <div class="col-md-4">
+      <img src="/Images/ic_campus_logo.png" class="img-fluid rounded-start" alt="App Logo">
+    </div>
+    <div class="col-md-8">
+      <div class="card-body">
+        <h5 class="card-title">No Submissions</h5>
+        <p class="card-text">Please make sure your android app is functional</p>
+        <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+      </div>
+    </div>
+  </div>
+</div>
+    }
+
+</div>

@@ -1,0 +1,19 @@
+﻿@model LoginModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = "_LoginLayout";
+}
+<div class="container">
+    <form style="background: rgb(0,51,102);
+background: linear-gradient(159deg, rgba(0,51,102,1) 0%, rgba(15,82,186,1) 100%);">
+        <div class="w-25" style="margin-left:40%;margin-top:20%; ">
+            <div class="form-group m-3">
+                <input type="text" class="form-control" asp-for="Username" />
+            </div>
+            <div class="form-group m-3">
+                <input class="form-control" asp-for="Password" type="password" />
+            </div>
+        </div>
+       
+    </form>
+</div>
