@@ -42,7 +42,7 @@ namespace UNI_ASSETS.Data
         const string AdminEmail = "makubolebohang@gmail.com";
 
         /// <summary>
-        /// Checks for any pending migrations and seeds the User Database with the admin user(programmer)
+        /// Checks for any pending migrations and seeds the User Database with the admin user(programmer) and the 'Staff' role
         /// </summary>
         /// <param name="app">The Current running Application Instance</param>
 
@@ -73,6 +73,11 @@ namespace UNI_ASSETS.Data
                     }
                 }
                 context.SaveChanges();
+            }
+            var role = await RoleManager.FindByNameAsync("Staff");
+            if(role == null)
+            {
+               await RoleManager.CreateAsync(new IdentityRole("Staff"));
             }
         }
     }

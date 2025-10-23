@@ -1,15 +1,22 @@
-﻿using UNI_ASSETS.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using UNI_ASSETS.Models;
 
 namespace UNI_ASSETS.Data
 {
     public interface ISubmissionRepository:IBaseRepository<Submission>
     {
         Asset GetLikelyToReplace();
+        IEnumerable<Submission> GetAllAssetSubmissions(string AssetId);
     }
     public class SubmissionRepository : BaseRepository<Submission>, ISubmissionRepository
     {
         public SubmissionRepository(AppDbContext context) : base(context)
         {
+        }
+
+        public IEnumerable<Submission> GetAllAssetSubmissions(string AssetId)
+        {
+            return context.Submissions.Where(sub=>sub.Equals(AssetId)).Include(x=>x.Asset);
         }
 
         public Asset GetLikelyToReplace()

@@ -18,7 +18,7 @@ namespace UNI_ASSETS.Controllers
         {
             submission.CreatedDate = DateTime.UtcNow;
             submission.Reviewed = false;
-            submission.ReviewStatus = "Pending";
+            submission.ReviewStatus = ReviewStatus.Pending;
 
             repository.SubmissionRepository.Create(submission);
             repository.Save();

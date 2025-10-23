@@ -12,6 +12,18 @@ namespace UNI_ASSETS.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Analytics",
+                columns: table => new
+                {
+                    LogId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Analytics", x => x.LogId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Assets",
                 columns: table => new
                 {
@@ -58,18 +70,27 @@ namespace UNI_ASSETS.Migrations
                 {
                     SubmissionId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    LogId = table.Column<int>(type: "int", nullable: true),
                     AssetId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     StaffId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DateReviewed = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Image = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
                     Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Location = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Condition = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Reviewed = table.Column<bool>(type: "bit", nullable: false),
-                    ReviewStatus = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    ReviewStatus = table.Column<int>(type: "int", nullable: false),
+                    AnalysisLogId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Submissions", x => x.SubmissionId);
+                    table.ForeignKey(
+                        name: "FK_Submissions_Analytics_AnalysisLogId",
+                        column: x => x.AnalysisLogId,
+                        principalTable: "Analytics",
+                        principalColumn: "LogId");
                     table.ForeignKey(
                         name: "FK_Submissions_Assets_AssetId",
                         column: x => x.AssetId,
@@ -81,6 +102,11 @@ namespace UNI_ASSETS.Migrations
                         principalTable: "Staff",
                         principalColumn: "Id");
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Submissions_AnalysisLogId",
+                table: "Submissions",
+                column: "AnalysisLogId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Submissions_AssetId",
@@ -98,6 +124,9 @@ namespace UNI_ASSETS.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Submissions");
+
+            migrationBuilder.DropTable(
+                name: "Analytics");
 
             migrationBuilder.DropTable(
                 name: "Assets");

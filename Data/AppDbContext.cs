@@ -13,9 +13,17 @@ namespace UNI_ASSETS.Data
         {
                 
         }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+           var analyticsTable= modelBuilder.Entity<AppAnalytics>();
+            analyticsTable.HasKey(x => x.LogId);
+            analyticsTable.HasMany(x => x.Submissions).WithOne(x=>x.Analysis);
+            
+        }
         public DbSet<Asset> Assets { get; set; }
         public DbSet<AppUser> Staff { get; set; }
         public DbSet<Submission> Submissions { get; set; }
+        public DbSet<AppAnalytics> Analytics { get; set; }
     }
     public class IdentityContext : IdentityDbContext<AppUser>
     {

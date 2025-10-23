@@ -1,10 +1,11 @@
 ﻿@model HomeViewModel
 @{
     ViewData["Title"] = "Index";
+    string state = (string)TempData["State"] ?? "OFF";
 }
 <div>
-    <h2>Home</h2>
-   
+    <div><span class="display-2 m-3">Home</span> </div>
+   <div class=""><form asp-action="StartTimer" asp-route-id="@state"><button class="btn @(state== "OFF"?"btn-warning":"btn-primary")">@(state)</button></form></div>
     @if(Model.Assets != null)
     {
         <br />
