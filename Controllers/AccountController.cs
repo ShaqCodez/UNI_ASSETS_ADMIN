@@ -23,23 +23,35 @@ namespace UNI_ASSETS.Controllers
         }
         [AllowAnonymous]
         [HttpGet]
-        public IActionResult Login()
+        public IActionResult Login(string? returnUrl = null)
         {
-            return View();
+            return View(new LoginModel { ReturnUrl = returnUrl });
         }
         [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Login(LoginModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await _userManager.FindByNameAsync(model.Username);
+            if (user == null)
             {
-                var user = await _userManager.FindByNameAsync(model.Username);
-                if (user != null)
-                {
-                    await signInManager.SignInAsync(user, model.IsPersistent);
-                    return RedirectToAction("Index", "Home");
-                }
+                ModelState.AddModelError("", "Invalid login attempt.");
+                return View(model);
             }
+
+            var result = await signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, false);
+
+            if (result.Succeeded)
+            {
+                if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
+                    return Redirect(model.ReturnUrl);
+
+                return RedirectToAction("Index", "Home");
+            }
+
+            ModelState.AddModelError("", "Invalid login attempt.");
             return View(model);
         }
         [HttpPost]

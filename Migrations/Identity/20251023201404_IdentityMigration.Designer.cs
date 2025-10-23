@@ -12,7 +12,7 @@ using UNI_ASSETS.Data;
 namespace UNI_ASSETS.Migrations.Identity
 {
     [DbContext(typeof(IdentityContext))]
-    [Migration("20251020143917_IdentityMigration")]
+    [Migration("20251023201404_IdentityMigration")]
     partial class IdentityMigration
     {
         /// <inheritdoc />

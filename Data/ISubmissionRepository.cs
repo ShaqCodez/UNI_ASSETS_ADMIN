@@ -7,6 +7,7 @@ namespace UNI_ASSETS.Data
     {
         Asset GetLikelyToReplace();
         IEnumerable<Submission> GetAllAssetSubmissions(string AssetId);
+        List<Submission> GetSubmissionsWithDetails();
     }
     public class SubmissionRepository : BaseRepository<Submission>, ISubmissionRepository
     {
@@ -16,7 +17,7 @@ namespace UNI_ASSETS.Data
 
         public IEnumerable<Submission> GetAllAssetSubmissions(string AssetId)
         {
-            return context.Submissions.Where(sub=>sub.Equals(AssetId)).Include(x=>x.Asset);
+            return context.Submissions.Where(sub=>sub.Asset.AssetId.Equals(AssetId)).Include(x=>x.Asset).Include(s=>s.Staff);
         }
 
         public Asset GetLikelyToReplace()
@@ -32,6 +33,13 @@ namespace UNI_ASSETS.Data
             asset = assetpair.OrderBy(x=>x.Value).First().Key;
             return asset; 
         }
-        
+
+        public List<Submission> GetSubmissionsWithDetails()
+        {
+           return context.Submissions
+                .Include(s => s.Asset)
+                .Include(s => s.Staff)
+                .ToList();
+        }
     }
 }

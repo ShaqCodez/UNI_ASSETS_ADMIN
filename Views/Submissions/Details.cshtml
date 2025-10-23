@@ -1,0 +1,45 @@
+﻿@model Submission
+@{
+    ViewData["Title"] = "Submission Details";
+}
+
+<div class="container mt-5">
+    <h3>Asset: @Model.Asset?.Name</h3>
+    <hr />
+
+    <dl class="row">
+        <dt class="col-sm-3">Submitted By</dt>
+        <dd class="col-sm-9">@Model.Staff?.Surname</dd>
+
+        <dt class="col-sm-3">Condition</dt>
+        <dd class="col-sm-9">@Model.Condition</dd>
+
+        <dt class="col-sm-3">Location</dt>
+        <dd class="col-sm-9">@Model.Location</dd>
+
+        <dt class="col-sm-3">Note</dt>
+        <dd class="col-sm-9">@Model.Note</dd>
+
+        <dt class="col-sm-3">Date Submitted</dt>
+        <dd class="col-sm-9">@Model.CreatedDate</dd>
+    </dl>
+
+    <div>
+        @if (Model.Image != null)
+        {
+            var base64 = Convert.ToBase64String(Model.Image);
+            var imgSrc = $"data:image/jpeg;base64,{base64}";
+            <img src="@imgSrc" class="rounded shadow mt-3" style="max-width: 400px;" />
+        }
+    </div>
+
+    <div class="mt-4">
+        <form asp-action="Approve" asp-route-id="@Model.SubmissionId" method="post" class="d-inline">
+            <button type="submit" class="btn btn-success">Approve</button>
+        </form>
+        <form asp-action="Reject" asp-route-id="@Model.SubmissionId" method="post" class="d-inline">
+            <button type="submit" class="btn btn-danger">Reject</button>
+        </form>
+        <a asp-action="ReviewList" class="btn btn-secondary">Back</a>
+    </div>
+</div>

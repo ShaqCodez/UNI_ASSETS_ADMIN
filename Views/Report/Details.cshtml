@@ -1,0 +1,101 @@
+﻿@model AssetReportViewModel
+@{
+    ViewData["Title"] = "Asset Analytics";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-3">Analytics for Asset: <span class="text-primary">@Model.Asset.Name</span></h2>
+    <p><strong>ID:</strong> @Model.Asset.AssetId</p>
+    <p><strong>Description:</strong> @Model.Asset.Description</p>
+    <p><strong>Default Location:</strong> @Model.Asset.Default_Location</p>
+    <p><strong>Total Reports:</strong> @Model.TotalReports</p>
+
+    <div class="row text-center my-4">
+        <div class="col-md-3">
+            <div class="card shadow p-3 mb-4 border-success">
+                <h6>Reviewed (%)</h6>
+                <h3>@Model.PercentageReviewed%</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow p-3 mb-4 border-warning">
+                <h6>Pending (%)</h6>
+                <h3>@Model.PercentagePending%</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow p-3 mb-4 border-danger">
+                <h6>Rejected (%)</h6>
+                <h3>@Model.PercentageRejected%</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow p-3 mb-4 border-info">
+                <h6>Avg. Review Duration</h6>
+                <h4>@Model.AverageDuration.Days days</h4>
+            </div>
+        </div>
+    </div>
+
+    <h4 class="mt-5">Submission History</h4>
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Date Submitted</th>
+                <th>Condition</th>
+                <th>Status</th>
+                <th>Location</th>
+                <th>Note</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var report in Model.Reports)
+            {
+                <tr>
+                    <td>@report.CreatedDate.ToShortDateString()</td>
+                    <td>@report.Condition</td>
+                    <td>
+                        @if (report.ReviewStatus == ReviewStatus.Reviewed)
+                        {
+                            <span class="badge bg-success">Reviewed</span>
+                        }
+                        else if (report.ReviewStatus == ReviewStatus.Pending)
+                        {
+                            <span class="badge bg-warning text-dark">Pending</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Rejected</span>
+                        }
+                    </td>
+                    <td>@report.Location</td>
+                    <td>@report.Note</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="mt-5">
+        <canvas id="statusChart" height="120"></canvas>
+    </div>
+</div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('statusChart');
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Reviewed', 'Pending', 'Rejected'],
+                datasets: [{
+                    data: [
+                        @Model.PercentageReviewed,
+                        @Model.PercentagePending,
+                        @Model.PercentageRejected
+                    ],
+                    backgroundColor: ['#198754', '#ffc107', '#dc3545']
+                }]
+            }
+        });
+    </script>

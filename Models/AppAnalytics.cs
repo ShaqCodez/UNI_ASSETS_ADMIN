@@ -28,11 +28,11 @@ namespace UNI_ASSETS.Models
         /// <summary>
         /// Gets the number of submissions that went unreviewed for a week
         /// </summary>
-        public int ReviewBackLogWeekly { get => GetReviewBackLog7days(); }
+        public int ReviewBackLogWeekly { get => GetReviewBackLog(7); }
         /// <summary>
         /// Gets the number of submissions that went unreviewed for more than a month
         /// </summary>
-        public int ReviewBackLogMonthly { get => GetReviewBackLog30days(); }
+        public int ReviewBackLogMonthly { get => GetReviewBackLog(30); }
         /// <summary>
         /// Tracks the pace at which the system is clearing submitted reports per week
         /// </summary>
@@ -51,9 +51,10 @@ namespace UNI_ASSETS.Models
         public double PercentageRejected { get => GetForStatus(ReviewStatus.Rejected); }
         private double GetForStatus(ReviewStatus reviewStatus)
         {
-            int totalSubmissions = Submissions.Count();
-            int totalForStatus = Submissions.Count(x => x.ReviewStatus == reviewStatus);
-            return totalSubmissions / totalForStatus;
+            if (Submissions.Count == 0) return 0;
+            double total = Submissions.Count;
+            double count = Submissions.Count(s => s.ReviewStatus == reviewStatus);
+            return Math.Round((count / total) * 100, 2);
         }
         /// <summary>
         /// Gets the number of Reports for a particular Asset
@@ -75,14 +76,11 @@ namespace UNI_ASSETS.Models
         }
         private TimeSpan GetAverageDuration()
         {
-            var duration = Submissions.Select(x => x.DateReviewed - x.CreatedDate);
-            TimeSpan AverageDuration = new TimeSpan();
-            foreach (var individualspan in duration)
-            {
-                AverageDuration.Add(individualspan);
-            }
-            AverageDuration.Divide(duration.Count());
-            return AverageDuration;
+            var reviewed = Submissions.Where(s => s.DateReviewed.HasValue).ToList();
+            if (!reviewed.Any()) return TimeSpan.Zero;
+
+            var totalTicks = reviewed.Sum(s => (s.DateReviewed.Value - s.CreatedDate).Ticks);
+            return TimeSpan.FromTicks(totalTicks / reviewed.Count);
         }
         /// <summary>
         /// Gets the number of submissions by an employee per x number of days
@@ -105,29 +103,19 @@ namespace UNI_ASSETS.Models
         {
             return Submissions.Count(x=>x.Location.Equals(Location,StringComparison.CurrentCultureIgnoreCase));    
         }
-        private int GetReviewBackLog7days()
+        private int GetReviewBackLog(int days)
         {
-            
-           int total = Submissions.Count(x=>(DateTime.Now-x.CreatedDate).Days <= 7 && x.ReviewStatus == ReviewStatus.Pending);
-
-            return total;
+            return Submissions.Count(s =>
+                s.ReviewStatus == ReviewStatus.Pending &&
+                (DateTime.Now - s.CreatedDate).Days >= days);
         }
-        private int GetReviewBackLog30days()
-        {
-            int total = Submissions.Count(x => (DateTime.Now - x.CreatedDate).Days >=30 && x.ReviewStatus == ReviewStatus.Pending);
-
-            return total;
-        }
+       
         private int GetVelocity()
         {
-            int count = 0;
-            var reviewedSubmissions = Submissions.Where(x => x.ReviewStatus == ReviewStatus.Reviewed).ToList();
-            count = reviewedSubmissions.Count(x =>
-            {
-                int days = (x.DateReviewed - DateTime.Now).Days;
-                return days > 0 && days <= 7 ;
-            });
-            return count;
+            return Submissions.Count(s =>
+           s.ReviewStatus == ReviewStatus.Reviewed &&
+           s.DateReviewed.HasValue &&
+           (DateTime.Now - s.DateReviewed.Value).Days <= 7);
         }
         /// <summary>
         /// Gets the number of reports originating from an area based on the location and review status

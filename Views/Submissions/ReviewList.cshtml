@@ -1,0 +1,74 @@
+﻿@model IEnumerable<Submission>
+@{
+    ViewData["Title"] = "Pending Reviews";
+}
+
+<div class="container mt-5">
+    <h2 class="text-primary mb-4">Pending Asset Submissions</h2>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success">@TempData["Message"]</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            🎉 No pending submissions. All caught up!
+        </div>
+    }
+    else
+    {
+        <table class="table table-hover align-middle shadow-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th>Asset</th>
+                    <th>Staff</th>
+                    <th>Condition</th>
+                    <th>Location</th>
+                    <th>Note</th>
+                    <th>Image</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if(Model != null){
+                @foreach (var submission in Model)
+                {
+                    <tr>
+                        <td>
+                            <strong>@submission.Asset?.Name</strong><br />
+                            <small class="text-muted">@submission.AssetId</small>
+                        </td>
+                        <td>@submission.Staff?.UserName</td>
+                        <td>@submission.Condition</td>
+                        <td>@submission.Location</td>
+                        <td>@submission.Note</td>
+                        <td>
+                            @if (submission.Image != null)
+                            {
+                                var base64 = Convert.ToBase64String(submission.Image);
+                                var imgSrc = $"data:image/jpeg;base64,{base64}";
+                                <img src="@imgSrc" width="100" class="rounded shadow-sm" />
+                            }
+                            else
+                            {
+                                <span class="text-muted">No image</span>
+                            }
+                        </td>
+                        <td>
+                            <form asp-action="Approve" asp-route-id="@submission.SubmissionId" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                            </form>
+                            <form asp-action="Reject" asp-route-id="@submission.SubmissionId" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                            </form>
+                            <a asp-action="Details" asp-route-id="@submission.SubmissionId" class="btn btn-outline-secondary btn-sm">View</a>
+                        </td>
+                    </tr>
+                }
+                }
+            </tbody>
+        </table>
+    }
+</div>

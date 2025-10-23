@@ -74,21 +74,19 @@ namespace UNI_ASSETS.Migrations
                     AssetId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     StaffId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DateReviewed = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DateReviewed = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Image = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
                     Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Location = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Condition = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Reviewed = table.Column<bool>(type: "bit", nullable: false),
-                    ReviewStatus = table.Column<int>(type: "int", nullable: false),
-                    AnalysisLogId = table.Column<int>(type: "int", nullable: true)
+                    ReviewStatus = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Submissions", x => x.SubmissionId);
                     table.ForeignKey(
-                        name: "FK_Submissions_Analytics_AnalysisLogId",
-                        column: x => x.AnalysisLogId,
+                        name: "FK_Submissions_Analytics_LogId",
+                        column: x => x.LogId,
                         principalTable: "Analytics",
                         principalColumn: "LogId");
                     table.ForeignKey(
@@ -104,14 +102,14 @@ namespace UNI_ASSETS.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Submissions_AnalysisLogId",
-                table: "Submissions",
-                column: "AnalysisLogId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Submissions_AssetId",
                 table: "Submissions",
                 column: "AssetId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Submissions_LogId",
+                table: "Submissions",
+                column: "LogId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Submissions_StaffId",

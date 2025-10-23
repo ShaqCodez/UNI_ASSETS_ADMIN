@@ -1,11 +1,15 @@
 ﻿@model HomeViewModel
 @{
     ViewData["Title"] = "Index";
-    string state = (string)TempData["State"] ?? "OFF";
 }
 <div>
-    <div><span class="display-2 m-3">Home</span> </div>
-   <div class=""><form asp-action="StartTimer" asp-route-id="@state"><button class="btn @(state== "OFF"?"btn-warning":"btn-primary")">@(state)</button></form></div>
+    <div><span class="display-2 m-3">Home </span>  
+        @if (User.Identity.IsAuthenticated)
+        {
+            <span class="display-2 m-3">Welcome @User.Identity.Name</span>
+        }
+    </div>
+
     @if(Model.Assets != null)
     {
         <br />
@@ -21,7 +25,7 @@
                 <div class="card-body">
                     <h5 class="card-title">@Model.Assets[count].Name</h5>
                     <p class="card-text">@Model.Assets[count].Description</p>
-                    <a href="#" class="btn btn-primary">Get Analytics on Asset</a>
+                    <a class="btn btn-primary" asp-action="Details" asp-controller="Report" asp-route-id="@Model.Assets[count].AssetId">Get Analytics on Asset</a>
                 </div>
                     </div>
                     i++;
@@ -71,5 +75,10 @@
   </div>
 </div>
     }
-
+    @if (User.Identity.IsAuthenticated)
+    {
+        <form asp-action="Logout" asp-controller="Account">
+            <button class="btn btn-primary">Log Out</button>
+    </form>
+    }
 </div>

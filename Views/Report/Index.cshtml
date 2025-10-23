@@ -1,0 +1,54 @@
+﻿@model ReportViewModel
+@{
+    ViewData["Title"] = "Analytics Dashboard";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="row text-center">
+    <div class="col-md-3">
+        <div class="card shadow p-3 mb-4">
+            <h4>Total Assets</h4>
+            <h3>@Model.TotalAssets</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow p-3 mb-4">
+            <h4>Total Submissions</h4>
+            <h3>@Model.TotalSubmissions</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow p-3 mb-4">
+            <h4>Reviewed (%)</h4>
+            <h3>@Model.PercentageReviewed%</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow p-3 mb-4">
+            <h4>Pending (%)</h4>
+            <h3>@Model.PercentagePending%</h3>
+        </div>
+    </div>
+</div>
+
+<div class="row text-center">
+    <div class="col-md-4">
+        <div class="card shadow p-3 mb-4">
+            <h5>Average Review Duration</h5>
+            <h3>@Model.AverageDuration.Days days</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow p-3 mb-4">
+            <h5>Backlog (7 Days)</h5>
+            <h3>@Model.ReviewBackLogWeekly</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow p-3 mb-4">
+            <h5>Backlog (30 Days)</h5>
+            <h3>@Model.ReviewBackLogMonthly</h3>
+        </div>
+    </div>
+</div>

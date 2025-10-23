@@ -12,7 +12,7 @@ using UNI_ASSETS.Data;
 namespace UNI_ASSETS.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251020143723_InitialMigration")]
+    [Migration("20251023201313_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -123,9 +123,6 @@ namespace UNI_ASSETS.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SubmissionId"));
 
-                    b.Property<int?>("AnalysisLogId")
-                        .HasColumnType("int");
-
                     b.Property<string>("AssetId")
                         .HasColumnType("nvarchar(450)");
 
@@ -135,7 +132,7 @@ namespace UNI_ASSETS.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("DateReviewed")
+                    b.Property<DateTime?>("DateReviewed")
                         .HasColumnType("datetime2");
 
                     b.Property<byte[]>("Image")
@@ -153,17 +150,14 @@ namespace UNI_ASSETS.Migrations
                     b.Property<int>("ReviewStatus")
                         .HasColumnType("int");
 
-                    b.Property<bool>("Reviewed")
-                        .HasColumnType("bit");
-
                     b.Property<string>("StaffId")
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("SubmissionId");
 
-                    b.HasIndex("AnalysisLogId");
-
                     b.HasIndex("AssetId");
+
+                    b.HasIndex("LogId");
 
                     b.HasIndex("StaffId");
 
@@ -172,13 +166,13 @@ namespace UNI_ASSETS.Migrations
 
             modelBuilder.Entity("UNI_ASSETS.Models.Submission", b =>
                 {
-                    b.HasOne("UNI_ASSETS.Models.AppAnalytics", "Analysis")
-                        .WithMany("Submissions")
-                        .HasForeignKey("AnalysisLogId");
-
                     b.HasOne("UNI_ASSETS.Models.Asset", "Asset")
                         .WithMany()
                         .HasForeignKey("AssetId");
+
+                    b.HasOne("UNI_ASSETS.Models.AppAnalytics", "Analysis")
+                        .WithMany("Submissions")
+                        .HasForeignKey("LogId");
 
                     b.HasOne("UNI_ASSETS.Models.AppUser", "Staff")
                         .WithMany()

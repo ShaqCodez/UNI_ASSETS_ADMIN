@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Globalization;
 
 namespace UNI_ASSETS.Models
 {
@@ -14,22 +15,30 @@ namespace UNI_ASSETS.Models
         public string AssetId { get; set; }
         public string StaffId { get; set; }
         public DateTime CreatedDate { get; set; }
-        public DateTime DateReviewed { get; private set; }
-        private bool IsReviewed;
+        public DateTime? DateReviewed { get;  set; }
+       
         public byte[] Image { get; set; }
         public string Note { get; set; }
         public string Location { get; set; }
-        public Asset Asset { get; set; }
+       
         public string Condition { get; set; }
+       
+        public ReviewStatus ReviewStatus { get; set; } = ReviewStatus.Pending;
+
+        [ForeignKey(nameof(AssetId))]
+        public Asset Asset { get; set; }
+
+        [ForeignKey(nameof(StaffId))]
         public AppUser Staff { get; set; }
-        public bool Reviewed { get => IsReviewed; set 
-            {
-                DateReviewed = DateTime.Now;
-                ReviewStatus = ReviewStatus.Reviewed;
-                IsReviewed = value;
-            } 
-        }
-        public ReviewStatus ReviewStatus { get; set; }
+
+        [ForeignKey(nameof(LogId))]
         public AppAnalytics Analysis { get; set; }
+
+        public void MarkReviewed()
+        {
+            ReviewStatus = ReviewStatus.Reviewed;
+            DateReviewed = DateTime.Now;
+        }
+       
     }
 }

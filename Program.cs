@@ -18,7 +18,16 @@ builder.Services.AddCors(options =>
 });
 builder.Services.AddDbContext<AppDbContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("AssetManager")));
 builder.Services.AddDbContext<IdentityContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("IdentityAssetManager")));
-builder.Services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<IdentityContext>();
+builder.Services.AddIdentity<AppUser, IdentityRole>(opts => {
+    opts.Password.RequiredLength = 6;
+    opts.Password.RequireNonAlphanumeric = false;
+    opts.Password.RequireLowercase = false;
+    opts.Password.RequireUppercase = false;
+    opts.Password.RequireDigit = false;
+    opts.User.RequireUniqueEmail = true;
+    //opts.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyz";
+}).AddEntityFrameworkStores<IdentityContext>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

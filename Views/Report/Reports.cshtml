@@ -1,0 +1,44 @@
+﻿@model IEnumerable<Submission>
+
+@{
+    ViewData["Title"] = "Reports";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-3 text-primary">Asset Verification Reports</h2>
+    <p class="text-muted">Below is a summary of all asset submissions.</p>
+
+    <div class="mb-3">
+        <a class="btn btn-danger" asp-action="DownloadReport">
+            <i class="bi bi-file-earmark-pdf"></i> Download PDF
+        </a>
+    </div>
+
+    <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Asset ID</th>
+                <th>Asset Name</th>
+                <th>Condition</th>
+                <th>Location</th>
+                <th>Staff</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if(Model != null){
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.AssetId</td>
+                    <td>@item.Asset?.Name</td>
+                    <td>@item.Condition</td>
+                    <td>@item.Location</td>
+                    <td>@item.Staff?.UserName</td>
+                    <td>@item.ReviewStatus</td>
+                </tr>
+            }
+            }
+        </tbody>
+    </table>
+</div>

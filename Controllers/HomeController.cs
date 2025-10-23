@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using UNI_ASSETS.Data;
+using UNI_ASSETS.Models;
 using UNI_ASSETS.Models.ViewModels;
 
 namespace UNI_ASSETS.Controllers
@@ -21,14 +23,13 @@ namespace UNI_ASSETS.Controllers
             if(id == "OFF")
             {
                 id = "ON";
-                repository.AnalyticsRepository.ChangeInterval(100000);
-                repository.AnalyticsRepository.Start();
+                
 
             }
             else
             {
                 id = "OFF";
-                repository.AnalyticsRepository.Stop();
+                
             }
             State = id;
                 return RedirectToAction("Index");
@@ -37,8 +38,10 @@ namespace UNI_ASSETS.Controllers
         {
             var model = new HomeViewModel { Assets = repository.AssetRepository.GetAll().ToList(), Submissions = null };
             State = "OFF";
+           
             return View(model);
         }
-        
+       
+
     }
 }

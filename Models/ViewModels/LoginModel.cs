@@ -4,11 +4,16 @@ namespace UNI_ASSETS.Models.ViewModels
 {
     public class LoginModel
     {
-        [Required(ErrorMessage ="Please enter a username")]
+        [Required]
         public string Username { get; set; }
-        [Required(ErrorMessage = "Please enter a password")]
+
+        [Required, DataType(DataType.Password)]
         public string Password { get; set; }
-        public bool IsPersistent { get; set; }
+
+        [Display(Name = "Remember me?")]
+        public bool RememberMe { get; set; }
+
+        public string? ReturnUrl { get; set; }
     }
     public class CreateUserModel
     {
