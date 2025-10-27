@@ -6,39 +6,83 @@
 
 <div class="container mt-5">
     <h2 class="mb-3 text-primary">Asset Verification Reports</h2>
-    <p class="text-muted">Below is a summary of all asset submissions.</p>
+    <p class="text-muted">Download detailed analytics reports below.</p>
 
-    <div class="mb-3">
-        <a class="btn btn-danger" asp-action="DownloadReport">
-            <i class="bi bi-file-earmark-pdf"></i> Download PDF
-        </a>
+    <!-- 🔍 Search + Sort Toolbar -->
+    <div class="d-flex flex-wrap align-items-center mb-4 gap-2">
+        <input type="text" id="searchInput" class="form-control w-auto"
+               placeholder="Search by asset, staff, or location..." />
+
+        <select id="sortOrder" class="form-select w-auto">
+            <option value="">Sort by...</option>
+            <option value="name_asc">Name (A–Z)</option>
+            <option value="name_desc">Name (Z–A)</option>
+            <option value="location_asc">Location (A–Z)</option>
+            <option value="location_desc">Location (Z–A)</option>
+            <option value="status_asc">Status (A–Z)</option>
+            <option value="status_desc">Status (Z–A)</option>
+        </select>
     </div>
 
-    <table class="table table-striped table-bordered">
-        <thead class="table-dark">
-            <tr>
-                <th>Asset ID</th>
-                <th>Asset Name</th>
-                <th>Condition</th>
-                <th>Location</th>
-                <th>Staff</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if(Model != null){
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>@item.AssetId</td>
-                    <td>@item.Asset?.Name</td>
-                    <td>@item.Condition</td>
-                    <td>@item.Location</td>
-                    <td>@item.Staff?.UserName</td>
-                    <td>@item.ReviewStatus</td>
-                </tr>
-            }
-            }
-        </tbody>
-    </table>
+    <!-- 📊 Report Download Buttons -->
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <form asp-action="DownloadReport" asp-controller="Report" method="post">
+            <button class="btn btn-danger">
+                <i class="bi bi-file-earmark-pdf"></i> Full Report
+            </button>
+        </form>
+
+        <form asp-action="DownloadAverageReviewTimeReport" asp-controller="Report" method="post">
+            <button class="btn btn-outline-primary">
+                <i class="bi bi-clock-history"></i> Average Review Time
+            </button>
+        </form>
+
+        <form asp-action="DownloadStatusDistributionReport" asp-controller="Report" method="post">
+            <button class="btn btn-outline-success">
+                <i class="bi bi-pie-chart"></i> Status Distribution
+            </button>
+        </form>
+
+        <form asp-action="DownloadReportsByLocation" asp-controller="Report" method="post">
+            <button class="btn btn-outline-warning">
+                <i class="bi bi-geo-alt"></i> Reports by Location
+            </button>
+        </form>
+    </div>
+
+    <!-- 🔁 Dynamic Table Container -->
+    <div id="reportTableContainer">
+        @await Html.PartialAsync("_ReportTable", Model)
+    </div>
 </div>
+
+
+    <script>
+        const searchInput = document.getElementById("searchInput");
+        const sortOrder = document.getElementById("sortOrder");
+        const container = document.getElementById("reportTableContainer");
+
+        // Debounce helper to reduce server hits
+        let typingTimer;
+        const debounceDelay = 400;
+
+        function fetchFilteredReports() {
+            const query = searchInput.value;
+            const sort = sortOrder.value;
+
+            fetch(`/Report/FilterReports?searchString=${encodeURIComponent(query)}&sortOrder=${encodeURIComponent(sort)}`)
+                .then(response => response.text())
+                .then(html => {
+                    container.innerHTML = html;
+                })
+                .catch(err => console.error("Error loading filtered data:", err));
+        }
+
+        searchInput.addEventListener("keyup", () => {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(fetchFilteredReports, debounceDelay);
+        });
+
+        sortOrder.addEventListener("change", fetchFilteredReports);
+    </script>

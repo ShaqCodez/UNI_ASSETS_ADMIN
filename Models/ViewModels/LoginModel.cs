@@ -25,4 +25,5 @@ namespace UNI_ASSETS.Models.ViewModels
         public string Email { get; set; }
         public string Role { get; set; }
     }
+   
 }

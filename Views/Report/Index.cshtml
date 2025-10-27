@@ -2,53 +2,71 @@
 @{
     ViewData["Title"] = "Analytics Dashboard";
 }
+<div class="m-3">
 
-<h2>@ViewData["Title"]</h2>
+    <h2>@ViewData["Title"]</h2>
 
-<div class="row text-center">
-    <div class="col-md-3">
-        <div class="card shadow p-3 mb-4">
-            <h4>Total Assets</h4>
-            <h3>@Model.TotalAssets</h3>
+    <div class="row text-center">
+        <div class="col-md-3">
+            <div class="card shadow p-3 mb-4">
+                <h4>Total Assets</h4>
+                <h3>@Model.TotalAssets</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow p-3 mb-4">
+                <h4>Total Submissions</h4>
+                <h3>@Model.TotalSubmissions</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow p-3 mb-4">
+                <h4>Reviewed (%)</h4>
+                <h3>@Model.PercentageReviewed%</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow p-3 mb-4">
+                <h4>Pending (%)</h4>
+                <h3>@Model.PercentagePending%</h3>
+            </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card shadow p-3 mb-4">
-            <h4>Total Submissions</h4>
-            <h3>@Model.TotalSubmissions</h3>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card shadow p-3 mb-4">
-            <h4>Reviewed (%)</h4>
-            <h3>@Model.PercentageReviewed%</h3>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card shadow p-3 mb-4">
-            <h4>Pending (%)</h4>
-            <h3>@Model.PercentagePending%</h3>
-        </div>
-    </div>
-</div>
 
-<div class="row text-center">
-    <div class="col-md-4">
-        <div class="card shadow p-3 mb-4">
-            <h5>Average Review Duration</h5>
-            <h3>@Model.AverageDuration.Days days</h3>
+    <div class="row text-center">
+        <div class="col-md-4">
+            <div class="card shadow p-3 mb-4">
+                <h5>Average Review Duration</h5>
+                <h3>@Model.AverageDuration.Days days</h3>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow p-3 mb-4">
+                <h5>Backlog (7 Days)</h5>
+                <h3>@Model.ReviewBackLogWeekly</h3>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow p-3 mb-4">
+                <h5>Backlog (30 Days)</h5>
+                <h3>@Model.ReviewBackLogMonthly</h3>
+            </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card shadow p-3 mb-4">
-            <h5>Backlog (7 Days)</h5>
-            <h3>@Model.ReviewBackLogWeekly</h3>
+    <a asp-action="Reports" asp-controller="Report">
+    <div class="card mb-3" style="max-width: 540px;">
+        <div class="row g-0">
+            <div class="col-md-4">
+                <img src="/Images/ic_campus_logo.png" class="img-fluid rounded-start" alt="App Logo">
+            </div>
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h5 class="card-title">Report Documents</h5>
+                    <p class="card-text">click this card to see analytic documents</p>
+                    <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card shadow p-3 mb-4">
-            <h5>Backlog (30 Days)</h5>
-            <h3>@Model.ReviewBackLogMonthly</h3>
-        </div>
-    </div>
+    </a>
 </div>

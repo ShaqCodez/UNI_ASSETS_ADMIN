@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using UNI_ASSETS.Data;
 using UNI_ASSETS.Models;
 
 namespace UNI_ASSETS.Controllers
 {
+    [Authorize]
     public class SubmissionsController : Controller
     {
         private readonly IRepositoryWrapper repository;
@@ -28,11 +30,26 @@ namespace UNI_ASSETS.Controllers
             TempData["Message"] = $"Submission #{id} rejected.";
             return RedirectToAction(nameof(ReviewList));
         }
-
-        // Optional: View submission details
-        public  IActionResult Details(int id)
+        [HttpPost]
+        public IActionResult Approve(int id)
         {
             var submission = repository.SubmissionRepository.GetById(id);
+            if (submission == null) return NotFound();
+
+            submission.ReviewStatus = ReviewStatus.Reviewed;
+            // submission.Reviewed = true;
+            submission.DateReviewed = DateTime.Now;
+
+            repository.SubmissionRepository.Update(submission);
+            repository.Save();
+
+            TempData["Message"] = $"Submission #{id} Reviewed And Approved.";
+            return RedirectToAction(nameof(ReviewList));
+        }
+       
+        public  IActionResult Details(int id)
+        {
+            var submission = repository.SubmissionRepository.GetSubmissionWithDetails(id);
 
             if (submission == null)
                 return NotFound();
@@ -42,7 +59,7 @@ namespace UNI_ASSETS.Controllers
 
         public IActionResult ReviewList()
         {
-            var submissions = repository.SubmissionRepository.GetSubmissionsWithDetails();
+            var submissions = repository.SubmissionRepository.GetSubmissionsByCondition(x=>x.ReviewStatus==ReviewStatus.Pending);
             return View(submissions);
         }
     }

@@ -1,22 +1,24 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using iTextSharp.LGPLv2;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UNI_ASSETS.Data;
 using UNI_ASSETS.Models;
 using UNI_ASSETS.Models.ViewModels;
-using iTextSharp.LGPLv2;
-using iTextSharp.text;
-using iTextSharp.text.pdf;
 namespace UNI_ASSETS.Controllers
 {
-    [Authorize(Roles ="Admin")]
+    [Authorize]
     public class ReportController : Controller
     {
         private readonly IRepositoryWrapper repository;
-
-        public ReportController(IRepositoryWrapper repository)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public ReportController(IRepositoryWrapper repository, IWebHostEnvironment webHostEnvironment)
         {
             this.repository = repository;
+            _webHostEnvironment = webHostEnvironment;
         }
         public IActionResult GetAnalytics()
         {
@@ -39,10 +41,43 @@ namespace UNI_ASSETS.Controllers
 
             return analytics;
         }
+        [HttpGet]
         public IActionResult Reports()
         {
-            var submissions = repository.SubmissionRepository.GetAll();
+            var submissions = repository.SubmissionRepository.GetSubmissionsWithDetails();
             return View(submissions);
+        }
+
+        [HttpGet]
+        public IActionResult FilterReports(string searchString, string sortOrder)
+        {
+            var submissions = repository.SubmissionRepository.GetSubmissionsWithDetails();
+
+            // Filter
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                searchString = searchString.ToLower();
+                submissions = submissions.Where(s =>
+                    (s.Asset != null && s.Asset.Name.ToLower().Contains(searchString)) ||
+                    (s.Staff != null && s.Staff.UserName.ToLower().Contains(searchString)) ||
+                    (!string.IsNullOrEmpty(s.Location) && s.Location.ToLower().Contains(searchString))
+                ).ToList();
+            }
+
+            // Sort
+            submissions = sortOrder switch
+            {
+                "name_asc" => submissions.OrderBy(s => s.Asset.Name).ToList(),
+                "name_desc" => submissions.OrderByDescending(s => s.Asset.Name).ToList(),
+                "location_asc" => submissions.OrderBy(s => s.Location).ToList(),
+                "location_desc" => submissions.OrderByDescending(s => s.Location).ToList(),
+                "status_asc" => submissions.OrderBy(s => s.ReviewStatus).ToList(),
+                "status_desc" => submissions.OrderByDescending(s => s.ReviewStatus).ToList(),
+                _ => submissions.OrderBy(s => s.Asset.AssetId).ToList()
+            };
+
+            // Return HTML snippet (partial view)
+            return PartialView("_ReportTable", submissions);
         }
         public IActionResult Details(string id)
         {
@@ -76,7 +111,7 @@ namespace UNI_ASSETS.Controllers
 
             return View(model);
         }
-        [HttpGet]
+        [HttpPost]
         public  IActionResult DownloadReport()
         {
             var submissions = repository.SubmissionRepository.GetSubmissionsWithDetails();
@@ -116,7 +151,7 @@ namespace UNI_ASSETS.Controllers
             doc.Add(table);
             doc.Close();
 
-            return File(stream.ToArray(), "application/pdf", "CampusAssetReport.pdf");
+            return File(stream.ToArray(), "application/pdf", "UniAssetReport.pdf");
         }
 
         private void AddCell(PdfPTable table, string text, bool isHeader = false)
@@ -158,5 +193,136 @@ namespace UNI_ASSETS.Controllers
                 ReviewStatusVelocity = analytics.ReviewStatusVelocity
             };
         }
+        [HttpPost]
+        public IActionResult DownloadAverageReviewTimeReport()
+        {
+            var submissions = repository.SubmissionRepository.GetSubmissionsWithDetails()
+                .Where(s => s.DateReviewed != null)
+                .ToList();
+
+            using var stream = new MemoryStream();
+            var doc = new Document(PageSize.A4, 25, 25, 25, 25);
+            PdfWriter.GetInstance(doc, stream);
+            doc.Open();
+            AddLogo(doc, _webHostEnvironment.WebRootPath);
+            var titleFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 18);
+            doc.Add(new Paragraph("Average Review Time Report", titleFont));
+            doc.Add(new Paragraph($"Generated on: {DateTime.Now}\n\n"));
+
+            var avgDays = submissions.Average(s => (s.DateReviewed - s.CreatedDate)?.TotalDays ?? 0);
+            doc.Add(new Paragraph($"Average Review Duration: {avgDays:F2} days\n\n"));
+
+            PdfPTable table = new PdfPTable(3);
+            table.WidthPercentage = 100;
+            AddCell(table, "Asset ID", true);
+            AddCell(table, "Created", true);
+            AddCell(table, "Days to Review", true);
+
+            foreach (var s in submissions)
+            {
+                AddCell(table, s.AssetId);
+                AddCell(table, s.CreatedDate.ToString("yyyy-MM-dd"));
+                AddCell(table, ((s.DateReviewed - s.CreatedDate)?.TotalDays ?? 0).ToString("F1"));
+            }
+
+            doc.Add(table);
+            doc.Close();
+
+            return File(stream.ToArray(), "application/pdf", "AverageReviewTimeReport.pdf");
+        }
+
+
+        [HttpPost]
+        public IActionResult DownloadStatusDistributionReport()
+        {
+            var submissions = repository.SubmissionRepository.GetSubmissionsWithDetails();
+            var grouped = submissions.GroupBy(s => s.ReviewStatus)
+                .Select(g => new { Status = g.Key.ToString(), Count = g.Count() })
+                .ToList();
+
+            using var stream = new MemoryStream();
+            var doc = new Document(PageSize.A4, 25, 25, 25, 25);
+            PdfWriter.GetInstance(doc, stream);
+            doc.Open();
+            AddLogo(doc, _webHostEnvironment.WebRootPath);
+            var titleFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 18);
+            doc.Add(new Paragraph("Review Status Distribution Report", titleFont));
+            doc.Add(new Paragraph($"Generated on: {DateTime.Now}\n\n"));
+
+            PdfPTable table = new PdfPTable(2);
+            table.WidthPercentage = 60;
+            AddCell(table, "Status", true);
+            AddCell(table, "Count", true);
+
+            foreach (var g in grouped)
+            {
+                AddCell(table, g.Status);
+                AddCell(table, g.Count.ToString());
+            }
+
+            doc.Add(table);
+            doc.Close();
+
+            return File(stream.ToArray(), "application/pdf", "ReviewStatusDistribution.pdf");
+        }
+
+
+        [HttpPost]
+        public IActionResult DownloadReportsByLocation()
+        {
+            var submissions = repository.SubmissionRepository.GetSubmissionsWithDetails();
+            var grouped = submissions.GroupBy(s => s.Location ?? "Unknown")
+                .Select(g => new { Location = g.Key, Count = g.Count() })
+                .ToList();
+
+            using var stream = new MemoryStream();
+            var doc = new Document(PageSize.A4, 25, 25, 25, 25);
+            PdfWriter.GetInstance(doc, stream);
+            doc.Open();
+
+            AddLogo(doc, _webHostEnvironment.WebRootPath);
+            var titleFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 18);
+            
+            doc.Add(new Paragraph("Reports by Location", titleFont));
+            
+            doc.Add(new Paragraph($"Generated on: {DateTime.Now}\n\n"));
+
+            PdfPTable table = new PdfPTable(2);
+            table.WidthPercentage = 80;
+            AddCell(table, "Location", true);
+            AddCell(table, "Total Reports", true);
+
+            foreach (var g in grouped)
+            {
+                AddCell(table, g.Location);
+                AddCell(table, g.Count.ToString());
+            }
+
+            doc.Add(table);
+            doc.Close();
+
+            return File(stream.ToArray(), "application/pdf", "ReportsByLocation.pdf");
+        }
+        private void AddLogo(Document doc, string wwwRootPath)
+        {
+            string logoPath = Path.Combine(wwwRootPath, "Images", "ic_campus_logo.png");
+
+            if (System.IO.File.Exists(logoPath))
+            {
+                var logo = iTextSharp.text.Image.GetInstance(logoPath);
+                logo.ScaleAbsolute(80f, 80f); 
+                logo.Alignment = Element.ALIGN_CENTER;
+                doc.Add(logo);
+
+                doc.Add(new Paragraph("\n"));
+            }
+            else
+            {
+                
+                var warningFont = FontFactory.GetFont(FontFactory.HELVETICA_OBLIQUE, 10, BaseColor.Gray);
+                doc.Add(new Paragraph("[Logo missing: ic_campus_logo.png]", warningFont));
+            }
+        }
+
     }
 }
