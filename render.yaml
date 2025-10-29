@@ -1,7 +1,7 @@
 services:
   - type: web
     name: asset-verification-app
-    env: dotnet
+    env: docker
     plan: free
     buildCommand: dotnet publish -c Release -o out
     startCommand: dotnet out/UNI_ASSETS.dll
