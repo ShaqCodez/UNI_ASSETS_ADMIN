@@ -33,6 +33,7 @@ namespace UNI_ASSETS.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AllowAnonymous]
         public async Task<IActionResult> Login(LoginModel model, string? returnUrl = null)
         {
             if (!ModelState.IsValid)
