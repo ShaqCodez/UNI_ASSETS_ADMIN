@@ -1,11 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.ObjectPool;
 using UNI_ASSETS.Data;
 using UNI_ASSETS.Models;
 using UNI_ASSETS.Models.ViewModels;
 
 namespace UNI_ASSETS.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly IRepositoryWrapper repository;
@@ -14,33 +17,15 @@ namespace UNI_ASSETS.Controllers
         {
             this.repository = repository;
         }
-        [TempData]
-        public string State { get; set; }
-        [HttpPost]
-        public IActionResult StartTimer(string id = "OFF")
-        {
-           
-            if(id == "OFF")
-            {
-                id = "ON";
-                
-
-            }
-            else
-            {
-                id = "OFF";
-                
-            }
-            State = id;
-                return RedirectToAction("Index");
-        }
+        
         public IActionResult Index()
         {
-            var model = new HomeViewModel { Assets = repository.AssetRepository.GetAll().ToList(), Submissions = null };
-            State = "OFF";
+            var model = repository.AssetRepository.GetAll().ToList();
+           
            
             return View(model);
         }
+        
        
 
     }

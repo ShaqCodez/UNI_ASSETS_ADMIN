@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using UNI_ASSETS.Models;
 
 namespace UNI_ASSETS.Data
@@ -8,6 +9,8 @@ namespace UNI_ASSETS.Data
         Asset GetLikelyToReplace();
         IEnumerable<Submission> GetAllAssetSubmissions(string AssetId);
         List<Submission> GetSubmissionsWithDetails();
+        Submission GetSubmissionWithDetails(int id);
+        List<Submission> GetSubmissionsByCondition(Expression<Func<Submission,bool>> where);
     }
     public class SubmissionRepository : BaseRepository<Submission>, ISubmissionRepository
     {
@@ -34,12 +37,23 @@ namespace UNI_ASSETS.Data
             return asset; 
         }
 
+        public List<Submission> GetSubmissionsByCondition(Expression<Func<Submission, bool>> where)
+        {
+            return context.Submissions.Include(s => s.Asset)
+                .Include(s => s.Staff).Where(where).ToList();
+        }
+
         public List<Submission> GetSubmissionsWithDetails()
         {
            return context.Submissions
                 .Include(s => s.Asset)
                 .Include(s => s.Staff)
                 .ToList();
+        }
+
+        public Submission GetSubmissionWithDetails(int id)
+        {
+            return context.Submissions.Include(x => x.Asset).Include(x => x.Staff).FirstOrDefault(x=>x.SubmissionId==id);
         }
     }
 }

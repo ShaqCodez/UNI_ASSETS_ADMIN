@@ -1,5 +1,6 @@
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using UNI_ASSETS.Data;
 using UNI_ASSETS.Models;
 
@@ -9,6 +10,20 @@ var builder = WebApplication.CreateBuilder(args);
 //builder.Services.AddRazorPages();
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IRepositoryWrapper, RepositoryWrapper>();
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.AccessDeniedPath = "/Account/AccessDenied";
+});
+//builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Asset Verification API",
+        Version = "v1",
+        Description = "API for receiving and reviewing asset verification submissions"
+    });
+});
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAndroid",
@@ -30,24 +45,40 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(opts => {
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
-app.UseCors("AllowAndroid");
-app.UseStaticFiles();
-app.UseRouting();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Asset Verification API v1");
+    });
+}
 
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting(); // ✅ must come before UseAuthorization
+
+app.UseCors("AllowAndroid");
+app.UseAuthentication(); // ✅ needed for Identity
 app.UseAuthorization();
-app.MapControllerRoute("", "{Controller=Home}/{Action=Index}/{id?}");
-//app.MapStaticAssets();
-//app.MapRazorPages()
-//.WithStaticAssets();
+app.MapControllers();
+// ✅ conventional MVC routing
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}"
+);
+
+// API controllers still work
+
+
 SeedData.AddDummy(app);
 SeedData.AddAdmin(app);
+
 app.Run();

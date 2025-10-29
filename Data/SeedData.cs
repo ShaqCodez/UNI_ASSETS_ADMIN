@@ -34,6 +34,8 @@ namespace UNI_ASSETS.Data
  );
             if(!context.Assets.Any())
             context.SaveChanges();
+
+            
            
         }
         const string AdminUser = "App_Admin";
