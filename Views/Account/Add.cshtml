@@ -14,8 +14,11 @@
 
     <div class="card shadow-sm border-0 rounded-3">
         <div class="card-body">
-            <form asp-action="Add" method="post" class="needs-validation" novalidate>
+            <form asp-action="Add" method="post" class="needs-validation" >
                 <div class="row mb-3">
+                    <div class="col-md-6" asp-validation-summary="ModelOnly">
+
+                    </div>
                     <div class="col-md-6">
                         <label asp-for="Username" class="form-label fw-semibold"></label>
                         <input asp-for="Username" class="form-control" placeholder="Enter username" />

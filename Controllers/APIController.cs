@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UNI_ASSETS.Data;
 using UNI_ASSETS.DTOs;
@@ -10,12 +12,20 @@ namespace UNI_ASSETS.Controllers
     [Route("api/[controller]")]
     public class APIController : Controller
     {
+        /*
+         Create endpoint for mobile app Logins;
+         */
+        private readonly UserManager<AppUser> _userManager;
+        private readonly SignInManager<AppUser> _signInManager;
         private readonly IRepositoryWrapper repository;
-        public APIController(IRepositoryWrapper repository)
+
+        public APIController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IRepositoryWrapper repository)
         {
+            _userManager = userManager;
+            _signInManager = signInManager;
             this.repository = repository;
-          
         }
+
 
         //[HttpPost]
         //public  IActionResult Submit([FromBody] Submission submission)
@@ -88,11 +98,35 @@ namespace UNI_ASSETS.Controllers
                 });
             }
         }
-        [HttpGet]
-        public IActionResult GetAll()
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequest model)
         {
-            var submissions = repository.SubmissionRepository.GetAll().OrderByDescending(s => s.CreatedDate).ToList();
-            return Ok(submissions);
+            if (!ModelState.IsValid)
+                return BadRequest(new { message = "Invalid data format." });
+
+            var user = await _userManager.FindByNameAsync(model.Username);
+            if (user == null)
+                return Unauthorized(new { message = "Invalid username or password." });
+
+            var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
+            if (!result.Succeeded)
+                return Unauthorized(new { message = "Invalid username or password." });
+
+            
+            return Ok(new
+            {
+                success = true,
+                message = "User authenticated successfully.",
+                username = user.UserName,
+                email = user.Email
+            });
+        }
+        public class LoginRequest
+        {
+            public string Username { get; set; }
+            public string Password { get; set; }
         }
     }
 }
+
