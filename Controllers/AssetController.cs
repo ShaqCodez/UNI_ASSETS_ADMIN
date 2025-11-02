@@ -5,6 +5,10 @@ using UNI_ASSETS.Models;
 
 namespace UNI_ASSETS.Controllers
 {
+    /*
+     Current Issues Include changing image for an asset on the hosted application
+     
+     */
     [Authorize]
     public class AssetController : Controller
     {
@@ -24,7 +28,7 @@ namespace UNI_ASSETS.Controllers
 
         // POST: Assets/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
+       // [ValidateAntiForgeryToken]
         public async Task<IActionResult> Add(Asset asset, IFormFile? ImageFile)
         {
             if (ModelState.IsValid)
@@ -32,6 +36,7 @@ namespace UNI_ASSETS.Controllers
                 if (ImageFile != null && ImageFile.Length > 0)
                 {
                     // Create unique file name
+                    
                     string uploadsFolder = Path.Combine(environment.WebRootPath, "Images");
                     string uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(ImageFile.FileName);
                     string filePath = Path.Combine(uploadsFolder, uniqueFileName);
@@ -83,63 +88,81 @@ namespace UNI_ASSETS.Controllers
 
         // POST: Assets/Edit/{id}
         [HttpPost]
-        [ValidateAntiForgeryToken]
+       // [ValidateAntiForgeryToken]
         public async  Task<IActionResult> Edit(string id, Asset asset, IFormFile? ImageFile)
         {
             if (id != asset.AssetId)
                 return NotFound();
 
-            if (ModelState.IsValid)
-            {
-                try
+            try {
+                if (ModelState.IsValid)
                 {
-                    var existingAsset = repository.AssetRepository.GetById(id);
-                    if (existingAsset == null)
-                        return NotFound();
-
-                    // Update basic info
-                    existingAsset.Name = asset.Name;
-                    existingAsset.Description = asset.Description;
-                    existingAsset.Default_Location = asset.Default_Location;
-
-                    // Handle new image upload (replace old)
-                    if (ImageFile != null && ImageFile.Length > 0)
+                    try
                     {
-                        // Delete old file if exists
-                        if (!string.IsNullOrEmpty(existingAsset.ImageUrl))
+                        var existingAsset = repository.AssetRepository.GetById(id);
+                        if (existingAsset == null)
+                            return NotFound();
+
+                        // Update basic info
+                        existingAsset.Name = asset.Name;
+                        existingAsset.Description = asset.Description;
+                        existingAsset.Default_Location = asset.Default_Location;
+
+                        // Handle new image upload (replace old)
+                        if (ImageFile != null && ImageFile.Length > 0)
                         {
-                            string oldFilePath = Path.Combine(environment.WebRootPath, existingAsset.ImageUrl.TrimStart('/'));
-                            if (System.IO.File.Exists(oldFilePath))
+                            // Delete old file if exists
+                            if (!string.IsNullOrEmpty(existingAsset.ImageUrl))
                             {
-                                System.IO.File.Delete(oldFilePath);
+                                try
+                                {
+                                    string oldFilePath = Path.Combine(environment.WebRootPath, existingAsset.ImageUrl.TrimStart('/'));
+                                    if (System.IO.File.Exists(oldFilePath))
+                                    {
+                                        System.IO.File.Delete(oldFilePath);
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    // Log the exception (not shown here for brevity)
+                                    ModelState.AddModelError("", "Error deleting old image: " + ex.Message);
+                                    return View(asset);
+                                }
+
+                                // Save new image
+                                string uploadsFolder = Path.Combine(environment.WebRootPath, "Images");
+                                string uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(ImageFile.FileName);
+                                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                                {
+                                    await ImageFile.CopyToAsync(fileStream);
+                                }
+
+                                existingAsset.ImageUrl = "/Images/" + uniqueFileName;
                             }
+
+                            repository.AssetRepository.Update(existingAsset);
+                            repository.Save();
+
+                            return RedirectToAction(nameof(Index));
                         }
-
-                        // Save new image
-                        string uploadsFolder = Path.Combine(environment.WebRootPath, "Images");
-                        string uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(ImageFile.FileName);
-                        string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                        using (var fileStream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await ImageFile.CopyToAsync(fileStream);
-                        }
-
-                        existingAsset.ImageUrl = "/Images/" + uniqueFileName;
                     }
-
-                    repository.AssetRepository.Update(existingAsset);
-                    repository.Save();
-
-                    return RedirectToAction(nameof(Index));
+                    catch
+                    {
+                        ModelState.AddModelError("", "Unable to save changes.");
+                    }
                 }
-                catch
-                {
-                    ModelState.AddModelError("", "Unable to save changes.");
-                }
+
+
             }
-
+            catch (Exception ex)
+            {
+              ModelState.AddModelError("", "An error occurred: " + ex.Message);
+                return View(asset);
+            }
             return View(asset);
+
         }
         [HttpPost]
         [ValidateAntiForgeryToken]

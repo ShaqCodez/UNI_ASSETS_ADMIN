@@ -37,7 +37,7 @@
                         <input asp-for="PhoneNumber" class="form-control" placeholder="Enter phone number" />
                         <span asp-validation-for="PhoneNumber" class="text-danger"></span>
                     </div>
-
+                    
                     <div class="col-md-6">
                         <label for="Role" class="form-label fw-semibold">Role</label>
                         @if (!Model.UserName.Equals("App_Admin"))
@@ -50,6 +50,13 @@
                         {
                             <input name="Role" value="Admin" readonly class="form-control disabled" />
                         }
+                    </div>
+                </div>
+                <div class="col-md-3">
+                     <div class="col-md-6">
+                        <label  class="form-label fw-semibold">Password</label>
+                        <input name="Password" class="form-control" type="password" />
+                      
                     </div>
                 </div>
 

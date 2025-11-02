@@ -11,6 +11,9 @@ using UNI_ASSETS.Models.ViewModels;
 
 namespace UNI_ASSETS.Controllers
 {
+    /*
+     Block android users from accessing the web application
+     */
     [Authorize]
     public class AccountController : Controller
     {
@@ -121,7 +124,7 @@ namespace UNI_ASSETS.Controllers
         //}
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Update(AppUser user, string Role)
+        public async Task<IActionResult> Update(AppUser user, string Role,string Password)
         {
             if (ModelState.IsValid)
             {
@@ -131,9 +134,10 @@ namespace UNI_ASSETS.Controllers
                     existingUser.UserName = user.UserName;
                     existingUser.Email = user.Email;
                     existingUser.PhoneNumber = user.PhoneNumber;
-
+                    
                     await _userManager.UpdateAsync(existingUser);
-
+                    await _userManager.RemovePasswordAsync(existingUser);
+                    await _userManager.AddPasswordAsync(existingUser, Password);
                     var userRoles = await _userManager.GetRolesAsync(existingUser);
                     await _userManager.RemoveFromRolesAsync(existingUser, userRoles);
                     var roleName = await roleManager.FindByIdAsync(Role);
@@ -166,11 +170,19 @@ namespace UNI_ASSETS.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(string id)
         {
-            var user = await _userManager.FindByIdAsync(id);
-           await _userManager.DeleteAsync(user);
-            repository.StaffRepository.Delete(user);
-            repository.Save();
-            return RedirectToAction("Index");
+            try
+            {
+                var user = await _userManager.FindByIdAsync(id);
+                await _userManager.DeleteAsync(user);
+                repository.StaffRepository.Delete(user);
+                repository.Save();
+                return RedirectToAction("Index");
+            }
+            catch(Exception e)
+            {
+                ModelState.AddModelError("", e.Message);
+                return View("Index");
+            }
         }
         [HttpGet]
         [Authorize(Roles = "Admin")]
@@ -201,8 +213,11 @@ namespace UNI_ASSETS.Controllers
                    await _userManager.AddToRoleAsync(user,Role.Name);
                     repository.StaffRepository.Create(user);
                     repository.Save();
+                    return RedirectToAction("Index");
                 }
-                return RedirectToAction("Index");
+                PopulateDDL(model.Role);
+                ModelState.AddModelError("", string.Join(",", result.Errors.Select(x=>x.Description)));
+                return View("Add");
             }
             PopulateDDL(model.Role);
             return View(model);

@@ -120,7 +120,7 @@ namespace UNI_ASSETS.Controllers
             var doc = new Document(PageSize.A4, 25, 25, 25, 25);
             PdfWriter.GetInstance(doc, stream);
             doc.Open();
-
+            AddLogo(doc, _webHostEnvironment.WebRootPath);
             // Title
             var titleFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 18);
             doc.Add(new Paragraph("Uni Assets Verification Report", titleFont));

@@ -51,11 +51,11 @@
         <a asp-controller="Submissions" asp-action="ReviewList" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Reviews" ? "active" : "")">
             <i class="bi bi-chat-left-text"></i> <span>Reviews</span>
         </a>
-        @if (User.IsInRole("Admin"))
+       @*  @if (User.IsInRole("Admin"))
         {
             <a asp-action="index" asp-controller="swagger" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Reviews" ? "active" : "")">
                 <i class="bi bi-pc"></i> <span>Simulated Subs</span>
-        </a>}
+        </a>} *@
         <a asp-action="index" asp-controller="Asset" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Reviews" ? "active" : "")">
             <i class="bi bi-clipboard"></i> <span>Asset Management</span>
         </a>
