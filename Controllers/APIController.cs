@@ -113,13 +113,15 @@ namespace UNI_ASSETS.Controllers
             if (!result.Succeeded)
                 return Unauthorized(new { message = "Invalid username or password." });
 
-            
+
             return Ok(new
             {
-                success = true,
+                IsAuthenticated = true,
                 message = "User authenticated successfully.",
                 username = user.UserName,
-                email = user.Email
+                email = user.Email,
+                name = user.Name,
+                surname=user.Surname,
             });
         }
         public class LoginRequest

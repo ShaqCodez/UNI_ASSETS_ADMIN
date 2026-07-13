@@ -12,8 +12,8 @@ using UNI_ASSETS.Data;
 namespace UNI_ASSETS.Migrations.Identity
 {
     [DbContext(typeof(IdentityContext))]
-    [Migration("20251023201404_IdentityMigration")]
-    partial class IdentityMigration
+    [Migration("20260713205517_InitialIdentity")]
+    partial class InitialIdentity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -182,6 +182,9 @@ namespace UNI_ASSETS.Migrations.Identity
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
