@@ -14,7 +14,7 @@ namespace UNI_ASSETS.Data
     }
     public class SubmissionRepository : BaseRepository<Submission>, ISubmissionRepository
     {
-        public SubmissionRepository(AppDbContext context) : base(context)
+        public SubmissionRepository(IdentityContext context) : base(context)
         {
         }
 

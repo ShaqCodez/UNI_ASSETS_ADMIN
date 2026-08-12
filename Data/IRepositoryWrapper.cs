@@ -10,12 +10,12 @@
     }
     public class RepositoryWrapper : IRepositoryWrapper
     {
-        private readonly AppDbContext context;
+        private readonly IdentityContext context;
             private ISubmissionRepository _submissionRepository;
         private IAssetRepository _assetRepository;
         private readonly IAnalyticsRepository analyticsRepository;
         private readonly IStaffRepository staffRepository;
-        public RepositoryWrapper(AppDbContext dbContext)
+        public RepositoryWrapper(IdentityContext dbContext)
         {
             this.context = dbContext;
             analyticsRepository = new AnalyticsRepository(context);

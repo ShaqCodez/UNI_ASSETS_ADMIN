@@ -3,20 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UNI_ASSETS.Data;
 
 #nullable disable
 
-namespace UNI_ASSETS.Migrations.Identity
+namespace UNI_ASSETS.Migrations
 {
     [DbContext(typeof(IdentityContext))]
-    [Migration("20260713205517_InitialIdentity")]
-    partial class InitialIdentity
+    partial class IdentityContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -158,6 +155,19 @@ namespace UNI_ASSETS.Migrations.Identity
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("UNI_ASSETS.Models.AppAnalytics", b =>
+                {
+                    b.Property<int>("LogId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LogId"));
+
+                    b.HasKey("LogId");
+
+                    b.ToTable("Analytics");
+                });
+
             modelBuilder.Entity("UNI_ASSETS.Models.AppUser", b =>
                 {
                     b.Property<string>("Id")
@@ -229,6 +239,77 @@ namespace UNI_ASSETS.Migrations.Identity
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("UNI_ASSETS.Models.Asset", b =>
+                {
+                    b.Property<string>("AssetId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Default_Location")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("AssetId");
+
+                    b.ToTable("Assets");
+                });
+
+            modelBuilder.Entity("UNI_ASSETS.Models.Submission", b =>
+                {
+                    b.Property<int>("SubmissionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SubmissionId"));
+
+                    b.Property<string>("AssetId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Condition")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateReviewed")
+                        .HasColumnType("datetime2");
+
+                    b.Property<byte[]>("Image")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("Location")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("LogId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ReviewStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StaffId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("SubmissionId");
+
+                    b.HasIndex("AssetId");
+
+                    b.HasIndex("LogId");
+
+                    b.HasIndex("StaffId");
+
+                    b.ToTable("Submissions");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -278,6 +359,32 @@ namespace UNI_ASSETS.Migrations.Identity
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("UNI_ASSETS.Models.Submission", b =>
+                {
+                    b.HasOne("UNI_ASSETS.Models.Asset", "Asset")
+                        .WithMany()
+                        .HasForeignKey("AssetId");
+
+                    b.HasOne("UNI_ASSETS.Models.AppAnalytics", "Analysis")
+                        .WithMany("Submissions")
+                        .HasForeignKey("LogId");
+
+                    b.HasOne("UNI_ASSETS.Models.AppUser", "Staff")
+                        .WithMany()
+                        .HasForeignKey("StaffId");
+
+                    b.Navigation("Analysis");
+
+                    b.Navigation("Asset");
+
+                    b.Navigation("Staff");
+                });
+
+            modelBuilder.Entity("UNI_ASSETS.Models.AppAnalytics", b =>
+                {
+                    b.Navigation("Submissions");
                 });
 #pragma warning restore 612, 618
         }

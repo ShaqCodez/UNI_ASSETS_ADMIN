@@ -14,12 +14,12 @@ namespace UNI_ASSETS.Data
         /// <param name="app">Current running Application Instance</param>
         public static void AddDummy(IApplicationBuilder app)
         {
-            AppDbContext context = app.ApplicationServices.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>();
+            IdentityContext context = app.ApplicationServices.CreateScope().ServiceProvider.GetRequiredService<IdentityContext>();
 
-            if (context.Database.GetPendingMigrations().Any())
-            {
-                context.Database.Migrate();
-            }
+            //if (context.Database.GetPendingMigrations().Any())
+            //{
+            //    context.Database.Migrate();
+            //}
             context.Assets.AddRange(
      new Asset { AssetId = "Asset001", Name = "Desktop", Description = "Dell Latitude 5420", Default_Location = "IT Office",ImageUrl = "/Images/asset001.avif" },
      new Asset { AssetId = "Asset002", Name = "Projector", Description = "Epson Multimedia Projector", Default_Location = "Conference Room", ImageUrl = @"/Images/asset002.webp" },
@@ -54,10 +54,10 @@ namespace UNI_ASSETS.Data
             UserManager<AppUser> manager = app.ApplicationServices.CreateScope().ServiceProvider.GetRequiredService<UserManager<AppUser>>();
             RoleManager<IdentityRole> RoleManager = app.ApplicationServices.CreateScope().ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-            if (context.Database.GetPendingMigrations().Any())
-            {
-                context.Database.Migrate();
-            }
+            //if (context.Database.GetPendingMigrations().Any())
+            //{
+            //    context.Database.Migrate();
+            //}
             var Result = await manager.FindByEmailAsync(AdminEmail);
             if(Result == null)
             {

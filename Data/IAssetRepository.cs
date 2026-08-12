@@ -8,7 +8,7 @@ namespace UNI_ASSETS.Data
     }
     public class AssetRepository : BaseRepository<Asset>, IAssetRepository
     {
-        public AssetRepository(AppDbContext context) : base(context)
+        public AssetRepository(IdentityContext context) : base(context)
         {
         }
 

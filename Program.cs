@@ -31,8 +31,8 @@ builder.Services.AddCors(options =>
                         .AllowAnyHeader()
                         .AllowAnyMethod());
 });
-builder.Services.AddDbContext<AppDbContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("AssetManager")));
-builder.Services.AddDbContext<IdentityContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("IdentityAssetManager")));
+//builder.Services.AddDbContext<IdentityContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("AssetManager")));
+builder.Services.AddDbContext<IdentityContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("AssetManager")));
 builder.Services.AddIdentity<AppUser, IdentityRole>(opts => {
     opts.Password.RequiredLength = 6;
     opts.Password.RequireNonAlphanumeric = false;

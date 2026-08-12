@@ -11,7 +11,7 @@ namespace UNI_ASSETS.Data
     }
     public class AnalyticsRepository : BaseRepository<AppAnalytics>, IAnalyticsRepository
     {
-        public AnalyticsRepository(AppDbContext context) : base(context)
+        public AnalyticsRepository(IdentityContext context) : base(context)
         {
             
         }
@@ -24,7 +24,7 @@ namespace UNI_ASSETS.Data
     }
     public class StaffRepository : BaseRepository<AppUser>, IStaffRepository
     {
-        public StaffRepository(AppDbContext context):base(context)
+        public StaffRepository(IdentityContext context):base(context)
         {
                 
         }

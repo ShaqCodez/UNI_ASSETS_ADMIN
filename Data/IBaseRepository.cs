@@ -15,8 +15,8 @@ namespace UNI_ASSETS.Data
     }
     public class BaseRepository<T> : IBaseRepository<T> where T : class
     {
-        protected AppDbContext context;
-        public BaseRepository(AppDbContext context)
+        protected IdentityContext context;
+        public BaseRepository(IdentityContext context)
         {
             this.context = context;       
         }
